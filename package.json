@@ -1,12 +1,17 @@
 {
   "name": "cur-env-bin",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Automatically find files that match the current environment.",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
+  "keywords": [
+    "node-bin",
+    "cross-platform",
+    "shim",
+    "bin"
+  ],
   "author": "",
   "license": "MIT",
   "dependencies": {

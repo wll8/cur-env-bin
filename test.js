@@ -5,6 +5,7 @@ void(async () => {
   const { binShim, getBinFile } = require(`./index.js`)
   
   const binPath = await binShim({
+    cwd: __dirname,
     owner: `syncthing`,
     repo: `syncthing`,
     fileListFn: async (github) => github.byTag(`v1.23.2`),

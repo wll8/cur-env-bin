@@ -4,8 +4,8 @@ const path = require(`path`)
 const arch = process.arch
 const platform = process.platform
 
-async function binShim({owner, repo, fileListFn, binFileFn}) {
-  const saveDir = `./lib/${platform}/${arch}/`
+async function binShim({owner, repo, fileListFn, binFileFn, cwd = __dirname}) {
+  const saveDir = `${cwd}/lib/${platform}/${arch}/`
   const infoFile = `${saveDir}/info.json`
   fs.existsSync(saveDir) === false && fs.mkdirSync(saveDir, {recursive: true})
   fs.existsSync(infoFile) === false && fs.writeFileSync(infoFile, util.j2s({
@@ -31,8 +31,8 @@ async function binShim({owner, repo, fileListFn, binFileFn}) {
       saveDir: info.saveDir,
       downloadPath: info.downloadPath,
     })
-    info.binFile = binFile
-    binFile = path.join(__dirname, binFile)
+    binFile = path.isAbsolute(binFile) ? binFile : path.join(cwd, binFile)
+    info.binFile = path.relative(cwd, binFile)
     return binFile
   } else {
     // Obtain the download address that matches the platform from the Internet
@@ -48,12 +48,12 @@ async function binShim({owner, repo, fileListFn, binFileFn}) {
     fs.mkdirSync(saveDir, {recursive: true})
     await util.downloadFile(file.browser_download_url, downloadPath)
     let binFile = await binFileFn({file, saveDir, downloadPath})
-    info.binFile = binFile
-    binFile = path.join(__dirname, binFile)
+    binFile = path.isAbsolute(binFile) ? binFile : path.join(cwd, binFile)
+    info.binFile = path.relative(cwd, binFile)
     info.status = `ok`
     info.file = file
-    info.saveDir = saveDir
-    info.downloadPath = downloadPath
+    info.saveDir = path.relative(cwd, saveDir)
+    info.downloadPath = path.relative(cwd, downloadPath)
     return binFile
   }
 }

@@ -11,6 +11,7 @@ const decompress = require(`decompress`);
 const { binShim, getBinFile } = require(`cur-env-bin`);
 
 const binPath = await binShim({
+  cwd: __dirname,
   owner: `syncthing`,
   repo: `syncthing`,
   fileListFn: async (github) => github.byTag(`v1.23.2`),

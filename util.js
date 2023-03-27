@@ -261,7 +261,18 @@ function getBinFile({dir, name}) {
   }
 }
 
+function noCacheRequire(filePath) {
+  delete require.cache[require.resolve(filePath)]
+  return require(filePath)
+}
+
+function j2s(json) {
+  return JSON.stringify(json, null, 2)
+}
+
 module.exports = {
+  j2s,
+  noCacheRequire,
   Github,
   getBinFile,
   downloadFile,

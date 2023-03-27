@@ -6,9 +6,34 @@ const platform = process.platform
 
 async function binShim({owner, repo, fileListFn, binFileFn}) {
   const saveDir = `./lib/${platform}/${arch}/`
-  const okTag = `${saveDir}/ok.txt`
-  if(fs.existsSync(okTag)) {
-    return fs.readFileSync(okTag, `utf8`)
+  const infoFile = `${saveDir}/info.json`
+  fs.existsSync(saveDir) === false && fs.mkdirSync(saveDir, {recursive: true})
+  fs.existsSync(infoFile) === false && fs.writeFileSync(infoFile, util.j2s({
+    status: ``,
+    binFile: ``,
+    file: {},
+    saveDir: ``,
+    downloadPath: ``,
+  }))
+  const info = new Proxy({}, {
+    get(obj, key) {
+      return util.noCacheRequire(infoFile)[key]
+    },
+    set(obj, key, val) {
+      const json = util.noCacheRequire(infoFile)
+      json[key] = val
+      fs.writeFileSync(infoFile, util.j2s(json))
+    },
+  })
+  if(info.status === `ok`) {
+    let binFile = fs.existsSync(info.binFile) ? info.binFile : await binFileFn({
+      file: info.file,
+      saveDir: info.saveDir,
+      downloadPath: info.downloadPath,
+    })
+    info.binFile = binFile
+    binFile = path.join(__dirname, binFile)
+    return binFile
   } else {
     // Obtain the download address that matches the platform from the Internet
     const github = new util.Github({
@@ -23,8 +48,12 @@ async function binShim({owner, repo, fileListFn, binFileFn}) {
     fs.mkdirSync(saveDir, {recursive: true})
     await util.downloadFile(file.browser_download_url, downloadPath)
     let binFile = await binFileFn({file, saveDir, downloadPath})
+    info.binFile = binFile
     binFile = path.join(__dirname, binFile)
-    fs.writeFileSync(okTag, `${binFile}`)
+    info.status = `ok`
+    info.file = file
+    info.saveDir = saveDir
+    info.downloadPath = downloadPath
     return binFile
   }
 }

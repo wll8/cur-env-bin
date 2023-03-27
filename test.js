@@ -8,7 +8,7 @@ void(async () => {
     owner: `syncthing`,
     repo: `syncthing`,
     fileListFn: async (github) => github.byTag(`v1.23.2`),
-    async binFileFn({file, saveDir, downloadPath}) {
+    async binFileFn({saveDir, downloadPath}) {
       const decompressDir = `${saveDir}/file`
       await decompress(downloadPath, decompressDir, {strip: 1})
       return getBinFile({dir: decompressDir, name: `syncthing`})

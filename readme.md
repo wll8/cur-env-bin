@@ -1,0 +1,28 @@
+Automatically find files that match the current environment.
+
+Suppose you need to use nodejs to call a binary file, this tool can help you quickly be compatible with various platforms and CPU architectures.
+
+## example
+
+Get the syncthing executable for the current platform:
+
+```js
+const decompress = require(`decompress`);
+const { binShim, getBinFile } = require(`cur-env-bin`);
+
+const binPath = await binShim({
+  owner: `syncthing`,
+  repo: `syncthing`,
+  fileListFn: async (github) => github.byTag(`v1.23.2`),
+  async binFileFn({ file, saveDir, downloadPath }) {
+    const decompressDir = `${saveDir}/file`;
+    await decompress(downloadPath, decompressDir, { strip: 1 });
+    return getBinFile({ dir: decompressDir, name: `syncthing` });
+  },
+});
+
+require(`child_process`).execSync(binPath, { stdio: `inherit` });
+```
+
+## license
+MIT

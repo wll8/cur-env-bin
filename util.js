@@ -5,7 +5,7 @@ const fs = require(`fs`)
 const http = require('./http.js')
 
 /**
- * os.platform 对应的别名
+ * The alias corresponding to os.platform
  */
 const platformList = [
   {
@@ -56,7 +56,7 @@ const platformList = [
 })
 
 /**
- * os.arch 所对应的别名
+ * The alias corresponding to os.arch
  */
 const archList = [
   {
@@ -83,7 +83,10 @@ const archList = [
     ],
   },
   {
-    name: `x64`, // 实际上 x64 并向下兼容 x32, 但有些人会把兼容 x32 的程序命名为 x64
+    /**
+     * In fact, x64 is not backward compatible with x32, but some people will name x32 compatible programs x64
+     */
+    name: `x64`,
     alias: [
       `x86_64`,
       `amd64`,
@@ -154,7 +157,7 @@ class Github {
     this.repo = repo
   }
   /**
-   * 根据 tag 获取版本
+   * Get the version according to tag
    */
   async byTag (tag) {
     const httpData = await http.get(`https://api.github.com/repos/${this.owner}/${this.repo}/releases/tags/${tag}`).catch((err) => console.log(String(err)))
@@ -167,7 +170,7 @@ class Github {
     return assets
   }
   /**
-   * 获取版本名称查找版本, 如果名称为空时返回最新版本
+   * Get the version name to find the version, if the name is empty, return the latest version
    */
   async byName (name) {
     const httpData = await http.get(`https://api.github.com/repos/${this.owner}/${this.repo}/releases?per_page=1&page=1`).catch((err) => console.log(String(err)))
@@ -182,9 +185,9 @@ class Github {
 }
 
 /**
- * 在文件列表根据文件名查找对应平台的文件
+ * Sort the files most likely to belong to the current environment first
  */
-async function getMatchFileList({fileList, arch, platform}) {
+async function getEnvSortList({fileList, arch, platform}) {
   const archObj = archList.find(item => item.name === arch)
   const platformObj = platformList.find(item => item.name === platform)
   let listMatch = fileList.filter(file => {
@@ -195,6 +198,18 @@ async function getMatchFileList({fileList, arch, platform}) {
         return file.name.match(alias)
       }
     })
+  })
+  .sort((a, b) => {
+    const name = a.name
+    return (
+      name.endsWith(`.tar`)
+      || name.endsWith(`.tar.gz`)
+      || name.endsWith(`.tar.xz`)
+      || name.endsWith(`.tgz`)
+      || name.endsWith(`.zip`)
+      || name.endsWith(`.7z`)
+      || name.endsWith(`.rar`)
+    ) ? -1 : 1
   })
   listMatch = listMatch.filter(file => {
     return archObj.alias.some(alias => {
@@ -246,7 +261,7 @@ async function downloadFile(fileUrl, outputLocationPath) {
 }
 
 /**
- * 获取主程序名称
+ * Get the name of the main program
  */
 function getBinFile({dir, name}) {
   if(process.platform === `win32`) {
@@ -271,10 +286,12 @@ function j2s(json) {
 }
 
 module.exports = {
+  platformList,
+  archList,
   j2s,
   noCacheRequire,
   Github,
   getBinFile,
   downloadFile,
-  getMatchFileList,
+  getEnvSortList,
 }

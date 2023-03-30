@@ -4,7 +4,22 @@ const path = require(`path`)
 const arch = process.arch
 const platform = process.platform
 
-async function binShim({owner, repo, fileListFn, binFileFn, cwd = __dirname}) {
+async function binShim({
+  // github user
+  owner,
+  // github repository
+  repo,
+  // This function is used to provide a list of files
+  fileListFn,
+  // Custom binary file picker
+  binFileFn,
+  // where to download the file
+  cwd = __dirname,
+  // Custom file picker
+  pick = async ({sortList}) => {
+    return sortList[0]
+  },
+}) {
   const saveDir = `${cwd}/lib/${platform}/${arch}/`
   const infoFile = `${saveDir}/info.json`
   fs.existsSync(saveDir) === false && fs.mkdirSync(saveDir, {recursive: true})
@@ -41,7 +56,14 @@ async function binShim({owner, repo, fileListFn, binFileFn, cwd = __dirname}) {
       repo,
     })
     const fileList = await fileListFn(github)
-    const file = (await util.getMatchFileList({fileList, arch, platform})).sort((a, b) => (b.size - a.size))[0]
+    const sortList = await util.getEnvSortList({fileList, arch, platform})
+    const file = await pick({
+      sortList,
+      arch,
+      platform,
+      platformList: util.platformList,
+      archList: util.archList
+    })
   
     // Download to specified location
     const downloadPath = `${saveDir}/${file.name}`

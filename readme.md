@@ -25,5 +25,16 @@ const binPath = await binShim({
 require(`child_process`).execSync(binPath, { stdio: `inherit` });
 ```
 
+## Allow configuration of proxy
+
+```sh
+# win
+set http_proxy=http://127.0.0.1:1081
+
+# linux
+export http_proxy=http://127.0.0.1:1081
+```
+
 ## license
+
 MIT

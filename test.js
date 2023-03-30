@@ -15,5 +15,5 @@ void(async () => {
       return getBinFile({dir: decompressDir, name: `syncthing`})
     },
   })
-  require(`child_process`).execSync(binPath, {stdio: `inherit`})
+  require(`child_process`).execSync(`${binPath}`, {stdio: `inherit`})
 })()

@@ -1,6 +1,6 @@
 {
   "name": "cur-env-bin",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Automatically find files that match the current environment.",
   "main": "index.js",
   "scripts": {

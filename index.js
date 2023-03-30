@@ -69,13 +69,14 @@ async function binShim({
     const downloadPath = `${saveDir}/${file.name}`
     fs.mkdirSync(saveDir, {recursive: true})
     await util.downloadFile(file.browser_download_url, downloadPath)
+    info.file = file
+    info.saveDir = path.relative(cwd, saveDir)
+    info.downloadPath = path.relative(cwd, downloadPath)
+
     let binFile = await binFileFn({file, saveDir, downloadPath})
     binFile = path.isAbsolute(binFile) ? binFile : path.join(cwd, binFile)
     info.binFile = path.relative(cwd, binFile)
     info.status = `ok`
-    info.file = file
-    info.saveDir = path.relative(cwd, saveDir)
-    info.downloadPath = path.relative(cwd, downloadPath)
     return binFile
   }
 }
